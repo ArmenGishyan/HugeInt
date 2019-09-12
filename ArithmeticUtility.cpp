@@ -1,6 +1,7 @@
 #include "ArithmeticUtility.h"
 #include <algorithm>
 #include <cassert>
+#include <sstream>
 
 std::vector<bool>  ArithmeticAtility::addTwoNumber(const std::vector<bool>& number1, const std::vector<bool>& number2)
 {
@@ -41,7 +42,7 @@ void ArithmeticAtility::copyVector(const std::vector<bool>& vecForCopy, std::vec
 {
 	while (startFor != endFor)
 	{
-		vecToCopy[startTo+1] = vecForCopy[startFor];
+		vecToCopy[startTo] = vecForCopy[startFor];
 		startTo++;
 		startFor++;
 	}
@@ -51,11 +52,15 @@ bool ArithmeticAtility::shiftVector(std::vector<bool>& vecForShift, int count, b
 {
 	if (count >= vecForShift.size())
 		return false;
+	if (right) {
+		for (int i = vecForShift.size() - 1 - count; i >= 0; --i)
+		{
+			vecForShift[i + count] = vecForShift[i];
+			vecForShift[i] = false;
+		}
+	}
+	else {
 
-	for (int i = vecForShift.size() - 1-count; i >= 0; --i)
-	{
-		vecForShift[i + count] = vecForShift[i];
-		vecForShift[i] = false;
 	}
 	return true;
 }
@@ -100,3 +105,74 @@ bool ArithmeticAtility::addTwoBit(bool bit1, bool bit2, bool& carry)
 		break;
 	}
 }
+
+std::vector<bool> ArithmeticAtility::multiplyTwoNumber(const std::vector<bool>& number_1, 
+													   const std::vector<bool>& number_2)
+{
+	std::vector<bool> multiplier = number_1;
+	std::vector<bool> multiplicand = number_2;
+
+	ArithmeticAtility::adjustTwoVec(multiplier, multiplicand);
+	assert(multiplier.size() == multiplicand.size());
+
+	std::vector<bool> twoTimeBigMultiplicand(multiplicand.size() * 2);
+
+	ArithmeticAtility::copyVector(multiplicand, twoTimeBigMultiplicand, 
+		                          0, multiplicand.size(), multiplicand.size()-1);
+
+
+	std::vector<bool> result(2 * multiplicand.size());
+
+	const int lastIndex = multiplier.size() - 1;
+	for (int i = 0; i < multiplier.size(); ++i)
+	{
+		switch (multiplier[lastIndex])
+		{
+		case true: {
+			result = addTwoNumber(twoTimeBigMultiplicand, result);
+		}
+		case false:
+		default:
+			break;
+		}
+	}
+}
+
+std::vector<bool> ArithmeticAtility::numberAsBool(char ch)
+{
+	std::vector<bool> asBinary;
+
+	if (ch == '0')
+	{
+		asBinary.push_back(false);
+		return asBinary;
+	}
+	std::stringstream stim;
+	stim << ch;
+	int number = 0;
+	stim >> number;
+	while (number != 1)
+	{
+		int result = number / 2;
+		bool val = number - (result * 2);
+		asBinary.push_back(val);
+		number = result;
+	}
+
+	asBinary.push_back(true);
+	reverseNumber(asBinary);
+
+	return asBinary;
+}
+
+void ArithmeticAtility::reverseNumber(std::vector<bool>& number)
+{
+	for (int i = 0; i < number.size() / 2; ++i)
+	{
+		const bool temp = number[i];
+		number[i] = number[number.size() - 1 - i];
+		number[number.size() - 1 - i] = temp;
+	}
+}
+
+
